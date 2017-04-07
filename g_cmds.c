@@ -880,7 +880,6 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
-
 /*
 =================
 ClientCommand

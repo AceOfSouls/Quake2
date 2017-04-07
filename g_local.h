@@ -1091,5 +1091,19 @@ struct edict_s
 	// common data blocks
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
+
+	int elect_damage;
+	int elect_dura;
+
+	int freeze_slow;
+	int freeze_dura;
+
+	int current_level;
+	int max_level;
+
+	int exp_gained;
+	int current_exp;
+
+	int choosen_element;
 };
 

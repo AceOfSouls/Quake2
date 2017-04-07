@@ -17,6 +17,8 @@ void Weapon_GrenadeLauncher (edict_t *ent);
 void Weapon_Railgun (edict_t *ent);
 void Weapon_BFG (edict_t *ent);
 
+void Weapon_Blade (edict_t *ent);
+
 gitem_armor_t jacketarmor_info	= { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info	= { 50, 100, .60, .30, ARMOR_COMBAT};
 gitem_armor_t bodyarmor_info	= {100, 200, .80, .60, ARMOR_BODY};
@@ -1518,6 +1520,29 @@ always owned, never in the world
 		NULL,
 		0,
 /* precache */ "sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav"
+	},
+
+	
+	/*New Sword weapon that will be a default weapon*/
+	{
+		"weapon_blade",
+		NULL,
+		Use_Weapon,
+		NULL,
+		Weapon_Blade,
+		"misc/w_pkup.wav",
+		NULL,
+		0,
+		"models/weapons/g_chain/tris.md2",
+		"models/weapons/v_chain/tris.md2",
+		"Blade",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		NULL,
+		0,
+		 "weapons/blastf1a.wav misc/lasfly.wav"
 	},
 
 	//
