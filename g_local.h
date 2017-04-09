@@ -1092,18 +1092,27 @@ struct edict_s
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
 
-	int elect_damage;
-	int elect_dura;
+	
+	
+	//
+	//MOD variables
+	//
 
+	int is_elect;
+	int elect_damage;
+	float elect_dura;
+
+	int is_frozen;
 	int freeze_slow;
-	int freeze_dura;
+	float freeze_dura;
 
 	int current_level;
-	int max_level;
 
-	int exp_gained;
 	int current_exp;
+	int needed_exp;
 
 	int choosen_element;
+
+	float original_speed;
 };
 

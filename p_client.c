@@ -1,5 +1,7 @@
 #include "g_local.h"
 #include "m_player.h"
+#include <time.h>
+#include <stdlib.h>
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
@@ -1088,6 +1090,7 @@ void PutClientInServer (edict_t *ent)
 	int		i;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
+	time_t t;
 
 	// find a spawn point
 	// do it before setting health back up, so farthest
@@ -1163,6 +1166,15 @@ void PutClientInServer (edict_t *ent)
 	ent->watertype = 0;
 	ent->flags &= ~FL_NO_KNOCKBACK;
 	ent->svflags &= ~SVF_DEADMONSTER;
+
+	//MOD
+	//This value is reset everytime the player spawns so that the blade they get has a different element 
+	//value of 0 to 2
+	srand((unsigned)time(&t));
+	ent->choosen_element = rand() % 3
+	//
+	//End of MOD 
+	//
 
 	VectorCopy (mins, ent->mins);
 	VectorCopy (maxs, ent->maxs);
@@ -1568,6 +1580,13 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	int		i, j;
 	pmove_t	pm;
 
+	//MOD
+	//level up variables
+	int max_level = 5;
+	int exp_gained = 60;
+	//
+	//
+
 	level.current_entity = ent;
 	client = ent->client;
 
@@ -1735,6 +1754,41 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);
 	}
+
+	//
+	//GAME MOD EDIT
+	//
+	// level up system goes here?
+	if (ent->current_level)//check if player has a current lvl, if not set lvl to 1 and 0 exp
+	{
+		if (other->deathflag)
+		{
+			if (ent->current_level < max_level)
+			{
+				ent->current_exp += exp_gained;
+				if (ent->current_exp >= ent->needed_exp)
+				{
+					ent->current_level++;
+					ent->current_exp = (ent->current_exp - ent->needed_exp);
+					ent->needed_exp *= 1.5;
+				}
+			}
+		}
+	}
+	else
+	{
+		ent->current_level = 1;
+		ent->current_exp = 0;
+	}
+
+	//To revert speed to regular
+	if (ent->is_frozen == 0)
+	{
+		ent->speed = original_speed;
+	}
+	//
+	//End Of edit
+	//
 }
 
 
