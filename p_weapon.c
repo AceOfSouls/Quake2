@@ -2,8 +2,6 @@
 
 #include "g_local.h"
 #include "m_player.h"
-//New Blade file that is added
-#include "g_blade.h"
 
 
 
@@ -1414,6 +1412,7 @@ void Weapon_BFG (edict_t *ent)
 	Weapon_Generic (ent, 8, 32, 55, 58, pause_frames, fire_frames, weapon_bfg_fire);
 }
 
-
+//New Blade file that is added
+#include "g_blade.h"
 //======================================================================
 

@@ -3,7 +3,6 @@ Blade variables that are defined to know whether to change these later
 buff/nerf damage yad yad
 */
 
-#include "g_local.h"
 
 #define BLADE_STANDARD_DAMAGE 60
 #define BLADE_FIRE_DAMAGE1 80
@@ -45,6 +44,7 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 				//This tells us to damage the thing that in our path
 				T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLADE);
 				//This will check if the target will have a status effect on them upon hit
+				/*
 				if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 1)
 				{
 					freeze_person(tr.ent,self, 0.5);
@@ -61,6 +61,7 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 				{
 					elect_person(tr.ent, self, 10);
 				}
+				*/
 			}
 			else
 			{
@@ -80,7 +81,7 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	}
 	return;
 }
-
+/*
 void freeze_person(edict_t *target, edict_t *owner, int slow)
 {
 	edict_t *freeze;
@@ -206,7 +207,7 @@ void blade_elect_think(edict_t *self)
 	VectorCopy(self->owner->s.origin, self->s.origin);
 	self->nextthink = level.time + .2;
 }
-
+*/
 
 // Basic non-special effect attack
 void blade_attack(edict_t *ent, vec3_t g_offset, int damage)
