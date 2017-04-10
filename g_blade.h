@@ -18,31 +18,24 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 {
 	trace_t tr;
 
-	vec3_t dir;
-	vec3_t forward;
-	vec3_t up;
-	vec3_t right;
 	vec3_t end;
 
-	tr = gi.trace(self->s.origin, NULL, NULL, start, self, MASK_SHOT);
-
-	if (!(tr.fraction < 1.0))       
+	 
+	if (self->current_level == 2)
 	{
-		vectoangles(aimdir, dir);
-		AngleVectors(dir, forward, right, up);           
-		if (self->current_level == 2)
-		{
-			VectorMA(start, BLADE_RANGE2, forward, end);
-		}
-		else if (self->current_level == 5)
-		{
-			VectorMA(start, BLADE_RANGE3, forward, end);
-		}
-		else
-		{
-			VectorMA(start, BLADE_START_RANGE, forward, end);
-		}
+		VectorMA(start, BLADE_RANGE2, aimdir, end);
 	}
+	else if (self->current_level == 5)
+	{
+		VectorMA(start, BLADE_RANGE3, aimdir, end);
+	}
+	else
+	{
+		VectorMA(start, BLADE_START_RANGE, aimdir, end);
+	}
+
+	tr = gi.trace(self->s.origin, NULL, NULL, end, self, MASK_SHOT);
+
 	if (!((tr.surface) && (tr.surface->flags & SURF_SKY)))
 	{
 		if (tr.fraction < 1.0)
@@ -50,21 +43,21 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 			if (tr.ent->takedamage)
 			{
 				//This tells us to damage the thing that in our path
-				T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0);
+				T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLADE);
 				//This will check if the target will have a status effect on them upon hit
-				if ((self->current_level == 3 || self->current_level == 4) && self->current_element == 1)
+				if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 1)
 				{
 					freeze_person(tr.ent,self, 0.5);
 				}
-				else if ((self->current_level == 3 || self->current_level == 4) && self->current_element == 2)
+				else if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 2)
 				{
 					elect_person(tr.ent, self, 6);
 				}
-				else if (self->current_level == 5 && self->current_element == 1)
+				else if (self->current_level == 5 && self->choosen_element == 1)
 				{
 					freeze_person(tr.ent, self, 0.3);
 				}
-				else if (self->current_level == 5 && self->current_element == 2)
+				else if (self->current_level == 5 && self->choosen_element == 2)
 				{
 					elect_person(tr.ent, self, 10);
 				}
@@ -74,7 +67,7 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 				if (strncmp(tr.surface->name, "sky", 3) != 0)
 				{
 					gi.WriteByte(svc_temp_entity);
-					gi.WriteByte(TE_GUNSHOT);
+					gi.WriteByte(TE_SPARKS);
 					gi.WritePosition(tr.endpos);
 					gi.WriteDir(tr.plane.normal);
 					gi.multicast(tr.endpos, MULTICAST_PVS);
@@ -108,17 +101,16 @@ void freeze_person(edict_t *target, edict_t *owner, int slow)
 	VectorClear(freeze->mins);
 	VectorClear(freeze->maxs);
 	freeze->owner = target;
-	freeze->orb = owner;
 	freeze->delay = level.time + 5;
 	freeze->nextthink = level.time + .8;
 	freeze->freeze_dura = level.time + 0.8;
-	freeze>think = blade_freeze_think;
+	freeze->think = blade_freeze_think;
 	freeze->freeze_slow = slow;
 	freeze->classname = "Freeze";
 	freeze->s.sound = gi.soundindex("weapons/bfg__l1a.wav");
 	gi.linkentity(freeze);
 
-	VectorCopy(target->s.origin, elect->s.origin);
+	VectorCopy(target->s.origin, freeze->s.origin);
 }
 
 
@@ -128,7 +120,7 @@ void blade_freeze_think(edict_t *self)
 	vec3_t		dir;
 	int			slow;
 	float		points;
-	vect3_t		v;
+	vec3_t		v;
 
 	if (level.time > self->delay)
 	{
@@ -174,7 +166,6 @@ void elect_person(edict_t *target, edict_t *owner, int damage)
 	VectorClear(elect->mins);
 	VectorClear(elect->maxs);
 	elect->owner = target;
-	elect->orb = owner;
 	elect->delay = level.time + 5;
 	elect->nextthink = level.time + .8;
 	elect->elect_dura = level.time + 0.8;
@@ -193,7 +184,7 @@ void blade_elect_think(edict_t *self)
 	vec3_t		dir;
 	int			damage;
 	float		points;
-	vect3_t		v;
+	vec3_t		v;
 
 	if (level.time > self->delay)
 	{
@@ -208,18 +199,10 @@ void blade_elect_think(edict_t *self)
 		return;
 	}
 
-	damage = elect_damage;
-	VectorAdd(self->orb->mins, self->orb->maxs, v);
-	VectorMA(self->orb->s.origin, 0.5, v, v);
-	VectorSubtract(self->s.origin, v, v);
-	points = damage - 0.5 * (VectorLength(v));
-	VectorSubtract(self->owner->s.origin, self->s.origin, dir);
+	damage = self->elect_damage;
 
-	if (self->PlasmaDelay < level.time)
-	{
-		T_Damage(self->owner, self, self->orb, dir, self->owner->s.origin, vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK, 0);
-		self->elect_dura = level.time + 0.8;
-	}
+	T_Damage(self->owner, self, self, dir, self->owner->s.origin, vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK, 0);
+	self->elect_dura = level.time + 0.8;
 	VectorCopy(self->owner->s.origin, self->s.origin);
 	self->nextthink = level.time + .2;
 }
@@ -240,7 +223,7 @@ void blade_attack(edict_t *ent, vec3_t g_offset, int damage)
 	VectorScale(forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_blade(ent, start, forward, damage, BLADE_KICK);
+	Fire_Blade(ent, start, forward, damage, BLADE_KICK);
 }
 
 void Weapon_blade_fire (edict_t *ent)
@@ -249,11 +232,11 @@ void Weapon_blade_fire (edict_t *ent)
 
 	//determine damage base on level and if it has the fire element
 
-	if ((ent->current_level == 3 || ent->current_level == 4) && ent->current_element == 0)
+	if ((ent->current_level == 3 || ent->current_level == 4) && ent->choosen_element == 0)
 	{
 		damage = BLADE_FIRE_DAMAGE1;
 	}
-	else if (ent->current_level == 5 && ent->current_element == 0)
+	else if (ent->current_level == 5 && ent->choosen_element == 0)
 	{
 		damage = BLADE_FIRE_DAMAGE2;
 	}

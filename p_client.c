@@ -366,6 +366,10 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message = "tried to invade";
 				message2 = "'s personal space";
 				break;
+			case MOD_BLADE:
+				message = "got sliced down by";
+				message2 = "'s blade.";
+				break;
 			}
 			if (message)
 			{
@@ -596,9 +600,9 @@ void InitClientPersistant (gclient_t *client)
 	item = FindItem("Blade");
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[ITEM_INDEX(item)] = 1;
-
+	/*
 	item = FindItem("Blaster");
-	client->pers.inventory[client->pers.selected_item] = 1;
+	client->pers.inventory[client->pers.selected_item] = 1;*/
 
 	client->pers.weapon = item;
 
@@ -1171,7 +1175,7 @@ void PutClientInServer (edict_t *ent)
 	//This value is reset everytime the player spawns so that the blade they get has a different element 
 	//value of 0 to 2
 	srand((unsigned)time(&t));
-	ent->choosen_element = rand() % 3
+	ent->choosen_element = rand() % 3;
 	//
 	//End of MOD 
 	//
@@ -1761,7 +1765,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	// level up system goes here?
 	if (ent->current_level)//check if player has a current lvl, if not set lvl to 1 and 0 exp
 	{
-		if (other->deathflag)
+		if (other->deadflag)
 		{
 			if (ent->current_level < max_level)
 			{
@@ -1784,7 +1788,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	//To revert speed to regular
 	if (ent->is_frozen == 0)
 	{
-		ent->speed = original_speed;
+		ent->speed = ent->original_speed;
 	}
 	//
 	//End Of edit

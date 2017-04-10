@@ -1531,18 +1531,18 @@ always owned, never in the world
 		NULL,
 		Weapon_Blade,
 		"misc/w_pkup.wav",
-		NULL,
-		0,
-		"models/weapons/g_chain/tris.md2",
-		"models/weapons/v_chain/tris.md2",
+		NULL,0,
+		"models/weapons/v_bfg/tris.md2", 
+		"w_blaster",
 		"Blade",
 		0,
 		0,
 		NULL,
-		IT_WEAPON,
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_BLADE,
 		NULL,
 		0,
-		 "weapons/blastf1a.wav misc/lasfly.wav"
+/* precache */ ""
 	},
 
 	//
