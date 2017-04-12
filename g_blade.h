@@ -13,75 +13,37 @@ buff/nerf damage yad yad
 #define BLADE_RANGE3 80
 
 
-void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+//Freeze think function to determine how long a person should be frozen and by how much
+void blade_freeze_think(edict_t *self)
 {
-	trace_t tr;
+	vec3_t		dir;
+	int			slow;
+	float		points;
+	vec3_t		v;
 
-	vec3_t end;
-
-	 
-	if (self->current_level == 2)
+	if (level.time > self->delay)
 	{
-		VectorMA(start, BLADE_RANGE2, aimdir, end);
-	}
-	else if (self->current_level == 5)
-	{
-		VectorMA(start, BLADE_RANGE3, aimdir, end);
-	}
-	else
-	{
-		VectorMA(start, BLADE_START_RANGE, aimdir, end);
+		self->owner->is_frozen = 0;
+		G_FreeEdict(self);
+		return;
 	}
 
-	tr = gi.trace(self->s.origin, NULL, NULL, end, self, MASK_SHOT);
-
-	if (!((tr.surface) && (tr.surface->flags & SURF_SKY)))
+	if (!self->owner)
 	{
-		if (tr.fraction < 1.0)
-		{
-			if (tr.ent->takedamage)
-			{
-				//This tells us to damage the thing that in our path
-				T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLADE);
-				//This will check if the target will have a status effect on them upon hit
-				/*
-				if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 1)
-				{
-					freeze_person(tr.ent,self, 0.5);
-				}
-				else if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 2)
-				{
-					elect_person(tr.ent, self, 6);
-				}
-				else if (self->current_level == 5 && self->choosen_element == 1)
-				{
-					freeze_person(tr.ent, self, 0.3);
-				}
-				else if (self->current_level == 5 && self->choosen_element == 2)
-				{
-					elect_person(tr.ent, self, 10);
-				}
-				*/
-			}
-			else
-			{
-				if (strncmp(tr.surface->name, "sky", 3) != 0)
-				{
-					gi.WriteByte(svc_temp_entity);
-					gi.WriteByte(TE_SPARKS);
-					gi.WritePosition(tr.endpos);
-					gi.WriteDir(tr.plane.normal);
-					gi.multicast(tr.endpos, MULTICAST_PVS);
-
-					if (self->client)
-						PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
-				}
-			}
-		}
+		G_FreeEdict(self);
+		return;
 	}
-	return;
+
+	slow = self->freeze_slow;
+	
+	if (self->speed != (self->original_speed * slow))
+	{
+		self->speed *= slow;
+		self->freeze_dura = level.time + 0.8;
+	}
+	self->nextthink = level.time + .2;
 }
-/*
+
 void freeze_person(edict_t *target, edict_t *owner, int slow)
 {
 	edict_t *freeze;
@@ -114,12 +76,11 @@ void freeze_person(edict_t *target, edict_t *owner, int slow)
 	VectorCopy(target->s.origin, freeze->s.origin);
 }
 
-
-//Freeze think function to determine how long a person should be frozen and by how much
-void blade_freeze_think(edict_t *self)
+//Elect think function to determine how long a person should be Elect and how long he will take damage
+void blade_elect_think(edict_t *self)
 {
 	vec3_t		dir;
-	int			slow;
+	int			damage;
 	float		points;
 	vec3_t		v;
 
@@ -136,16 +97,13 @@ void blade_freeze_think(edict_t *self)
 		return;
 	}
 
-	slow = self->freeze_slow;
-	
-	if (self->speed != (self->original_speed * slow))
-	{
-		self->speed *= slow;
-		self->freeze_dura = level.time + 0.8;
-	}
+	damage = self->elect_damage;
+
+	T_Damage(self->owner, self, self, dir, self->owner->s.origin, vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK, 0);
+	self->elect_dura = level.time + 0.8;
+	VectorCopy(self->owner->s.origin, self->s.origin);
 	self->nextthink = level.time + .2;
 }
-
 
 //Elect the opposing person
 void elect_person(edict_t *target, edict_t *owner, int damage)
@@ -179,35 +137,74 @@ void elect_person(edict_t *target, edict_t *owner, int damage)
 	VectorCopy(target->s.origin, elect->s.origin);
 }
 
-//Elect think function to determine how long a person should be Elect and how long he will take damage
-void blade_elect_think(edict_t *self)
+void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
 {
-	vec3_t		dir;
-	int			damage;
-	float		points;
-	vec3_t		v;
+	trace_t tr;
 
-	if (level.time > self->delay)
+	vec3_t end;
+
+	 
+	if (self->current_level == 2)
 	{
-		self->owner->is_frozen = 0;
-		G_FreeEdict(self);
-		return;
+		VectorMA(start, BLADE_RANGE2, aimdir, end);
+	}
+	else if (self->current_level == 5)
+	{
+		VectorMA(start, BLADE_RANGE3, aimdir, end);
+	}
+	else
+	{
+		VectorMA(start, BLADE_START_RANGE, aimdir, end);
 	}
 
-	if (!self->owner)
+	tr = gi.trace(self->s.origin, NULL, NULL, end, self, MASK_SHOT);
+
+	if (!((tr.surface) && (tr.surface->flags & SURF_SKY)))
 	{
-		G_FreeEdict(self);
-		return;
+		if (tr.fraction < 1.0)
+		{
+			if (tr.ent->takedamage)
+			{
+				//This tells us to damage the thing that in our path
+				T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLADE);
+				//This will check if the target will have a status effect on them upon hit
+				
+				if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 1)
+				{
+					freeze_person(tr.ent,self, 0.5);
+				}
+				else if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 2)
+				{
+					elect_person(tr.ent, self, 6);
+				}
+				else if (self->current_level == 5 && self->choosen_element == 1)
+				{
+					freeze_person(tr.ent, self, 0.3);
+				}
+				else if (self->current_level == 5 && self->choosen_element == 2)
+				{
+					elect_person(tr.ent, self, 10);
+				}
+				
+			}
+			else
+			{
+				if (strncmp(tr.surface->name, "sky", 3) != 0)
+				{
+					gi.WriteByte(svc_temp_entity);
+					gi.WriteByte(TE_SPARKS);
+					gi.WritePosition(tr.endpos);
+					gi.WriteDir(tr.plane.normal);
+					gi.multicast(tr.endpos, MULTICAST_PVS);
+
+					if (self->client)
+						PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
+				}
+			}
+		}
 	}
-
-	damage = self->elect_damage;
-
-	T_Damage(self->owner, self, self, dir, self->owner->s.origin, vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK, 0);
-	self->elect_dura = level.time + 0.8;
-	VectorCopy(self->owner->s.origin, self->s.origin);
-	self->nextthink = level.time + .2;
+	return;
 }
-*/
 
 // Basic non-special effect attack
 void blade_attack(edict_t *ent, vec3_t g_offset, int damage)
@@ -225,6 +222,10 @@ void blade_attack(edict_t *ent, vec3_t g_offset, int damage)
 	ent->client->kick_angles[0] = -1;
 
 	Fire_Blade(ent, start, forward, damage, BLADE_KICK);
+	if(ent->health >= 100)
+	{
+		Weapon_Blaster_Fire(ent);
+	}
 }
 
 void Weapon_blade_fire (edict_t *ent)
@@ -260,7 +261,7 @@ void Weapon_blade_fire (edict_t *ent)
 //frame mandatory stuff
 void Weapon_Blade (edict_t *ent)
 {
-	static int pause_frames[] = {14,32,50,0};
+	static int pause_frames[] = {14,32,0};
 	static int fire_frames[] = {2,8,0};
 
 	Weapon_Generic (ent, 1, 15, 48, 50, pause_frames, fire_frames, Weapon_blade_fire);

@@ -601,8 +601,8 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[ITEM_INDEX(item)] = 1;
 	
-	item = FindItem("Blaster");
-	client->pers.inventory[client->pers.selected_item] = 1;
+	/*item = FindItem("Blaster");
+	client->pers.inventory[client->pers.selected_item] = 1;*/
 
 	client->pers.weapon = item;
 
@@ -1175,7 +1175,7 @@ void PutClientInServer (edict_t *ent)
 	//This value is reset everytime the player spawns so that the blade they get has a different element 
 	//value of 0 to 2
 	srand((unsigned)time(&t));
-	ent->choosen_element = rand() % 3;
+	ent->choosen_element = (rand() % 3);
 	//
 	//End of MOD 
 	//
@@ -1583,6 +1583,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	edict_t	*other;
 	int		i, j;
 	pmove_t	pm;
+	int sec = 0;
 
 	//MOD
 	//level up variables
@@ -1765,16 +1766,17 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	// level up system goes here?
 	if (ent->current_level)//check if player has a current lvl, if not set lvl to 1 and 0 exp
 	{
-		if (other->deadflag)
+		if (ent->player_score < client->resp.score)
 		{
+			ent->player_score = client->resp.score;
 			if (ent->current_level < max_level)
 			{
-				ent->current_exp += exp_gained;
+				ent->current_exp = (ent->current_exp + exp_gained);
 				if (ent->current_exp >= ent->needed_exp)
 				{
 					ent->current_level++;
 					ent->current_exp = (ent->current_exp - ent->needed_exp);
-					ent->needed_exp *= 1.5;
+					ent->needed_exp = (ent->needed_exp * 1.5);
 				}
 			}
 		}
@@ -1783,6 +1785,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	{
 		ent->current_level = 1;
 		ent->current_exp = 0;
+		ent->needed_exp = 100;
 	}
 
 	//To revert speed to regular
@@ -1790,6 +1793,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	{
 		ent->speed = ent->original_speed;
 	}
+
+	gi.bprintf(PRINT_MEDIUM, "Your Level is: %d", ent->current_level);
 	//
 	//End Of edit
 	//

@@ -1116,5 +1116,7 @@ struct edict_s
 	int choosen_element;
 
 	float original_speed;
+
+	int player_score;
 };
 
