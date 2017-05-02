@@ -316,6 +316,75 @@ void HelpComputer (edict_t *ent)
 	gi.unicast (ent, true);
 }
 
+void showPlayerInfo(edict_t *ent)
+{
+	char	string[1024];
+	char	*ele;
+	char	*spe;
+
+	if(ent->choosen_special == 0)
+	{
+		spe = "Big Cut ";
+	}
+	else if(ent->choosen_special == 1)
+	{
+		spe = "Health  ";
+	}
+	else
+	{
+		spe = "Fire Fest";
+	}
+
+	if(ent->choosen_element == 0)
+	{
+		ele = "Fire";
+	}
+	else if(ent->choosen_element == 1)
+	{
+		ele = "Freeze";
+	}
+	else
+	{
+		ele = "Elect";
+	}
+
+	Com_sprintf (string, sizeof(string),
+		"xv 32 yv 8 picn help "			// background
+		"xv 202 yv 12 string2 \" Lvl: %i\" "		// level
+		"xv 0 yv 24 cstring2 \"Current EXP: %i\" "		// level name
+		"xv 0 yv 54 cstring2 \"Get kills don't die alright!\" "		// help 1
+		"xv 0 yv 110 cstring2 \"EXP Needed: %i\" "		// help 2
+		"xv 50 yv 164 string2 \" Special  Element   Charge\" "
+		"xv 50 yv 172 string2 \" %s		  %s         %i\" ", 
+		ent->current_level,
+		ent->current_exp,
+		ent->needed_exp,
+		spe,
+		ele,
+		ent->special_charge);
+
+	gi.WriteByte (svc_layout);
+	gi.WriteString (string);
+	gi.unicast (ent, true);
+}
+
+void Cmd_Pinfo_f (edict_t *ent)
+{
+	ent->client->showinventory = false;
+	ent->client->showhelp = false;
+
+	if (!deathmatch->value && !coop->value)
+		return;
+
+	if (ent->client->showscores)
+	{
+		ent->client->showscores = false;
+		return;
+	}
+
+	ent->client->showscores = true;
+	showPlayerInfo(ent);
+}
 
 /*
 ==================
@@ -326,7 +395,6 @@ Display the current help message
 */
 void Cmd_Help_f (edict_t *ent)
 {
-	// this is for backwards compatability
 	if (deathmatch->value)
 	{
 		Cmd_Score_f (ent);

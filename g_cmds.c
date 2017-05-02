@@ -919,6 +919,22 @@ void ClientCommand (edict_t *ent)
 		Cmd_Help_f (ent);
 		return;
 	}
+	if (Q_stricmp (cmd, "pinfo") == 0)
+	{
+		Cmd_Pinfo_f (ent);
+		return;
+	}
+	if (Q_stricmp (cmd, "special") == 0)
+	{
+		fire_special (ent);
+		return;
+	}
+
+	if (Q_stricmp (cmd, "maxlvl") == 0)
+	{
+		ent->current_level = 5;
+		return;
+	}
 
 	if (level.intermissiontime)
 		return;

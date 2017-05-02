@@ -2,7 +2,7 @@
 
 #include "g_local.h"
 #include "m_player.h"
-
+#include <stdio.h>
 
 
 static qboolean	is_quad;
@@ -835,31 +835,91 @@ void Weapon_Blaster_Fire (edict_t *ent)
 		damage = 5;
 	else
 		damage = 10;
-	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
-	ent->client->ps.gunframe++;
+	if(ent->special_blade_active == 0)
+	{
+		Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+		ent->client->ps.gunframe++;
 
-	VectorSet(tempvec, 0, 8, 0);
-	VectorAdd(tempvec, vec3_origin, tempvec);
-	Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+		VectorSet(tempvec, 0, 8, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
 
-	VectorSet(tempvec, 0, -8, 0);
-	VectorAdd(tempvec, vec3_origin, tempvec);
-	Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+		VectorSet(tempvec, 0, -8, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
 
-	VectorSet(tempvec, 0, 16, 0);
-	VectorAdd(tempvec, vec3_origin, tempvec);
-	Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+		VectorSet(tempvec, 0, 16, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
 
-	VectorSet(tempvec, 0, -16, 0);
-	VectorAdd(tempvec, vec3_origin, tempvec);
-	Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
-	VectorSet(tempvec, 0, 24, 0);
-	VectorAdd(tempvec, vec3_origin, tempvec);
-	Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+		VectorSet(tempvec, 0, -16, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+		VectorSet(tempvec, 0, 24, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
 
-	VectorSet(tempvec, 0, -24, 0);
-	VectorAdd(tempvec, vec3_origin, tempvec);
-	Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+		VectorSet(tempvec, 0, -24, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+	}
+	else
+	{
+		damage = 50;
+		Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+		ent->client->ps.gunframe++;
+
+		VectorSet(tempvec, 0, 8, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, -8, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, 16, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, -16, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, 24, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, -24, 0);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+		ent->client->ps.gunframe++;
+
+		VectorSet(tempvec, 0, 0, 8);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+	
+		VectorSet(tempvec, 0, 0, -8);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+			
+		VectorSet(tempvec, 0, 0, 16);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, 0, -16);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, 0, 24);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+
+		VectorSet(tempvec, 0, 0, -24);
+		VectorAdd(tempvec, vec3_origin, tempvec);
+		Blaster_Fire (ent, tempvec, damage, false, EF_BLASTER);
+	}
 }
 
 void Weapon_Blaster (edict_t *ent)
@@ -1438,5 +1498,6 @@ void Weapon_BFG (edict_t *ent)
 
 //New Blade file that is added
 #include "g_blade.h"
+#include "g_special.h"
 //======================================================================
 

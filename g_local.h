@@ -1114,8 +1114,14 @@ struct edict_s
 	int needed_exp;
 
 	int choosen_element;
+	int choosen_special;
+
+	int special_charge;
+	float special_charge_time; 
 
 	float original_speed;
+
+	int special_blade_active;
 
 	int player_score;
 };

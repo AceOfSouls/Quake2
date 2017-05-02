@@ -4,13 +4,15 @@ buff/nerf damage yad yad
 */
 
 
-#define BLADE_STANDARD_DAMAGE 60
-#define BLADE_FIRE_DAMAGE1 80
-#define BLADE_FIRE_DAMAGE2 100
+#define BLADE_STANDARD_DAMAGE 30
+#define BLADE_FIRE_DAMAGE1 40
+#define BLADE_FIRE_DAMAGE2 60
 #define BLADE_KICK 200
 #define BLADE_START_RANGE 40
 #define BLADE_RANGE2 60
 #define BLADE_RANGE3 80
+#define BLADE_SP_RANGE 600
+#define BLADE_SP_DAMAGE 200
 
 
 //Freeze think function to determine how long a person should be frozen and by how much
@@ -21,7 +23,13 @@ void blade_freeze_think(edict_t *self)
 	float		points;
 	vec3_t		v;
 
-	if (level.time > self->delay)
+	if(self->owner->is_frozen == 0)
+	{
+		G_FreeEdict(self);
+		return;
+	}
+
+	if (level.time > self->freeze_dura)
 	{
 		self->owner->is_frozen = 0;
 		G_FreeEdict(self);
@@ -84,9 +92,15 @@ void blade_elect_think(edict_t *self)
 	float		points;
 	vec3_t		v;
 
-	if (level.time > self->delay)
+	if(self->owner->is_elect == 0)
 	{
-		self->owner->is_frozen = 0;
+		G_FreeEdict(self);
+		return;
+	}
+
+	if (level.time > self->elect_dura)
+	{
+		self->owner->is_elect = 0;
 		G_FreeEdict(self);
 		return;
 	}
@@ -143,8 +157,11 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 
 	vec3_t end;
 
-	 
-	if (self->current_level == 2)
+	if(self->special_blade_active == 1)
+	{
+		VectorMA(start, BLADE_SP_RANGE, aimdir, end);
+	}
+	else if (self->current_level == 2)
 	{
 		VectorMA(start, BLADE_RANGE2, aimdir, end);
 	}
@@ -233,8 +250,11 @@ void Weapon_blade_fire (edict_t *ent)
 	int damage;
 
 	//determine damage base on level and if it has the fire element
-
-	if ((ent->current_level == 3 || ent->current_level == 4) && ent->choosen_element == 0)
+	if(ent->special_blade_active == 1)
+	{
+		damage = BLADE_SP_DAMAGE;
+	}
+	else if ((ent->current_level == 3 || ent->current_level == 4) && ent->choosen_element == 0)
 	{
 		damage = BLADE_FIRE_DAMAGE1;
 	}

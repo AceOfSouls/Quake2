@@ -1176,6 +1176,11 @@ void PutClientInServer (edict_t *ent)
 	//value of 0 to 2
 	srand((unsigned)time(&t));
 	ent->choosen_element = (rand() % 3);
+	ent->choosen_special = (rand() % 3);
+	ent->is_elect = 0;
+	ent->is_frozen = 0;
+	ent->special_charge_time = 0;
+	ent->special_charge = 0;
 	//
 	//End of MOD 
 	//
@@ -1794,7 +1799,15 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ent->speed = ent->original_speed;
 	}
 
-	gi.bprintf(PRINT_MEDIUM, "Your Level is: %d", ent->current_level);
+	if(ent->current_level >= 3 && ent->special_charge != 100)
+	{
+		if(ent->special_charge_time == level.time || ent->special_charge_time == 0)
+		{
+			ent->special_charge++;
+			ent->special_charge_time = (level.time + 1);
+		}
+	}
+	
 	//
 	//End Of edit
 	//
