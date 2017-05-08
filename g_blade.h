@@ -291,8 +291,8 @@ void Weapon_blade_fire (edict_t *ent)
 //frame mandatory stuff
 void Weapon_Blade (edict_t *ent)
 {
-	static int pause_frames[] = {14,32,0};
-	static int fire_frames[] = {2,8,0};
+	static int pause_frames[] = {14,0};
+	static int fire_frames[] = {2,0};
 
-	Weapon_Generic (ent, 1, 15, 48, 50, pause_frames, fire_frames, Weapon_blade_fire);
+	Weapon_Generic (ent, 1, 15, 30, 32, pause_frames, fire_frames, Weapon_blade_fire);
 }

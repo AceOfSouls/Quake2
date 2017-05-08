@@ -939,8 +939,58 @@ void ClientCommand (edict_t *ent)
 	{
 		ent->special_charge = 100;
 		return;
-	}if (Q_stricmp (cmd, "maxlvl") == 0)
+	}
 
+	if (Q_stricmp (cmd, "setsp1") == 0)
+	{
+		ent->choosen_special = 0;
+		return;
+	}
+	if (Q_stricmp (cmd, "setsp2") == 0)
+	{
+		ent->choosen_special = 1;
+		return;
+	}
+	if (Q_stricmp (cmd, "setsp3") == 0)
+	{
+		ent->choosen_special = 2;
+		return;
+	}
+	if (Q_stricmp (cmd, "setsp4") == 0)
+	{
+		ent->choosen_special = 3;
+		return;
+	}
+	if (Q_stricmp (cmd, "setsp5") == 0)
+	{
+		ent->choosen_special = 4;
+		return;
+	}
+	if (Q_stricmp (cmd, "setsp6") == 0)
+	{
+		ent->choosen_special = 5;
+		return;
+	}
+	if (Q_stricmp (cmd, "setele1") == 0)
+	{
+		ent->choosen_element = 0;
+		return;
+	}
+	if (Q_stricmp (cmd, "setele2") == 0)
+	{
+		ent->choosen_element = 1;
+		return;
+	}
+	if (Q_stricmp (cmd, "setele3") == 0)
+	{
+		ent->choosen_element = 2;
+		return;
+	}
+	if (Q_stricmp (cmd, "setele4") == 0)
+	{
+		ent->choosen_element = 3;
+		return;
+	}
 	if (level.intermissiontime)
 		return;
 

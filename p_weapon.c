@@ -1438,7 +1438,7 @@ void weapon_bfg_fire (edict_t *ent)
 	float	damage_radius = 1000;
 
 	if (deathmatch->value)
-		damage = 200;
+		damage = 30;
 	else
 		damage = 500;
 	/*
