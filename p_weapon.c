@@ -1441,7 +1441,7 @@ void weapon_bfg_fire (edict_t *ent)
 		damage = 200;
 	else
 		damage = 500;
-
+	/*
 	if (ent->client->ps.gunframe == 9)
 	{
 		// send muzzle flash
@@ -1455,15 +1455,16 @@ void weapon_bfg_fire (edict_t *ent)
 		PlayerNoise(ent, start, PNOISE_WEAPON);
 		return;
 	}
-
+	*/
 	// cells can go down during windup (from power armor hits), so
 	// check again and abort firing if we don't have enough now
+	/*
 	if (ent->client->pers.inventory[ent->client->ammo_index] < 50)
 	{
 		ent->client->ps.gunframe++;
 		return;
 	}
-
+	*/
 	if (is_quad)
 		damage *= 4;
 

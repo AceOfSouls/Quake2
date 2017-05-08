@@ -1105,7 +1105,6 @@ struct edict_s
 	float elect_dura;
 
 	int is_frozen;
-	int freeze_slow;
 	float freeze_dura;
 
 	int current_level;
@@ -1119,10 +1118,16 @@ struct edict_s
 	int special_charge;
 	float special_charge_time; 
 
-	float original_speed;
+	int special_inv;
+	int special_inv_dura;
+
+	int special_speed;
+	int special_spdura;
 
 	int special_blade_active;
 
 	int player_score;
+
+	vec3_t oldvelo;
 };
 

@@ -935,6 +935,11 @@ void ClientCommand (edict_t *ent)
 		ent->current_level = 5;
 		return;
 	}
+	if (Q_stricmp (cmd, "maxsp") == 0)
+	{
+		ent->special_charge = 100;
+		return;
+	}if (Q_stricmp (cmd, "maxlvl") == 0)
 
 	if (level.intermissiontime)
 		return;

@@ -1175,12 +1175,13 @@ void PutClientInServer (edict_t *ent)
 	//This value is reset everytime the player spawns so that the blade they get has a different element 
 	//value of 0 to 2
 	srand((unsigned)time(&t));
-	ent->choosen_element = (rand() % 3);
-	ent->choosen_special = (rand() % 3);
+	ent->choosen_element = (rand() % 4);
+	ent->choosen_special = (rand() % 6);
 	ent->is_elect = 0;
 	ent->is_frozen = 0;
 	ent->special_charge_time = 0;
 	ent->special_charge = 0;
+	ent->special_inv = 0;
 	//
 	//End of MOD 
 	//
@@ -1594,6 +1595,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	//level up variables
 	int max_level = 5;
 	int exp_gained = 60;
+	vec3_t velo;
+	vec3_t end, forward, right, up, add;
+	float t,speedmod, sp;
 	//
 	//
 
@@ -1793,11 +1797,21 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ent->needed_exp = 100;
 	}
 
-	//To revert speed to regular
-	if (ent->is_frozen == 0)
+	//Invis
+	if(ent->special_inv_dura <= level.time)
 	{
-		ent->speed = ent->original_speed;
+		ent->svflags &= ~SVF_NOCLIENT;
 	}
+
+	if(ent->special_inv == 1)
+	{
+		ent->svflags |= SVF_NOCLIENT;
+		ent->special_inv = 0;
+		ent->special_inv_dura = (level.time + 5);
+	}
+
+
+	//Special charge 
 
 	if(ent->current_level >= 3 && ent->special_charge != 100)
 	{
@@ -1808,6 +1822,73 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 	
+	//Freeze speed
+
+	if(ent->is_frozen == 1 && ent->special_speed != 1)
+	{
+		sp = 5;
+		speedmod = (sp * 0.2);
+		VectorClear (velo);
+		AngleVectors (ent->client->v_angle, forward, right, up);
+		VectorScale(forward, ucmd->forwardmove*speedmod, end);
+		VectorAdd(end,velo,velo);
+		AngleVectors (ent->client->v_angle, forward, right, up);
+		VectorScale(right, ucmd->sidemove*speedmod, end);
+		VectorAdd(end,velo,velo);
+		velo[2] = 0;
+		if(ent->current_level == 5)
+		{
+			velo[0] *= 0.25;
+			velo[1] *= 0.25;
+			speedmod *= 0.25;
+		}
+		else
+		{
+			velo[0] *= 0.50;
+			velo[1] *= 0.50;
+			speedmod *= 0.50;
+		}
+		VectorAdd(velo,ent->velocity,ent->velocity);
+		t = VectorLength(ent->velocity);
+		if (t > 300*speedmod || t < -300*speedmod)
+		{
+			VectorScale (ent->velocity, 300 * speedmod / t, ent->velocity);
+		}
+		ucmd->forwardmove = 0;
+		ucmd->sidemove = 0;
+	}
+
+	//Special Speed
+
+	if(ent->special_speed == 1)
+	{
+		sp = 5;
+		speedmod = (sp * 0.2);
+		VectorClear (velo);
+		AngleVectors (ent->client->v_angle, forward, right, up);
+		VectorScale(forward, ucmd->forwardmove*speedmod, end);
+		VectorAdd(end,velo,velo);
+		AngleVectors (ent->client->v_angle, forward, right, up);
+		VectorScale(right, ucmd->sidemove*speedmod, end);
+		VectorAdd(end,velo,velo);
+		velo[2] = 0;
+		velo[0] *= 2;
+		velo[1] *= 2;
+		speedmod *= 2;
+		VectorAdd(velo,ent->velocity,ent->velocity);
+		t = VectorLength(ent->velocity);
+		if (t > 300*speedmod || t < -300*speedmod)
+		{
+			VectorScale (ent->velocity, 300 * speedmod / t, ent->velocity);
+		}
+		ucmd->forwardmove = 0;
+		ucmd->sidemove = 0;
+	}
+
+	if(ent->special_spdura == level.time)
+	{
+		ent->special_speed = 0;
+	}
 	//
 	//End Of edit
 	//

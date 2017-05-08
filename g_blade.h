@@ -18,19 +18,16 @@ buff/nerf damage yad yad
 //Freeze think function to determine how long a person should be frozen and by how much
 void blade_freeze_think(edict_t *self)
 {
-	vec3_t		dir;
-	int			slow;
-	float		points;
-	vec3_t		v;
-
 	if(self->owner->is_frozen == 0)
 	{
+		VectorCopy(self->oldvelo,self->velocity);
 		G_FreeEdict(self);
 		return;
 	}
 
-	if (level.time > self->freeze_dura)
+	if (level.time == self->freeze_dura)
 	{
+		VectorCopy(self->oldvelo,self->velocity);
 		self->owner->is_frozen = 0;
 		G_FreeEdict(self);
 		return;
@@ -41,25 +38,23 @@ void blade_freeze_think(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
-
-	slow = self->freeze_slow;
 	
-	if (self->speed != (self->original_speed * slow))
+	if(self->is_frozen == 1)
 	{
-		self->speed *= slow;
-		self->freeze_dura = level.time + 0.8;
+		VectorCopy(self->velocity,self->oldvelo);
+		self->freeze_dura = level.time + 3;
 	}
+
 	self->nextthink = level.time + .2;
 }
 
-void freeze_person(edict_t *target, edict_t *owner, int slow)
+void freeze_person(edict_t *target, edict_t *owner)
 {
 	edict_t *freeze;
 
 	if (target->is_frozen > 0)
 		return;
 	target->is_frozen = 1;
-	target->original_speed = target->speed;
 	freeze = G_Spawn();
 	freeze->movetype = MOVETYPE_NOCLIP;
 	freeze->clipmask = MASK_SHOT;
@@ -74,9 +69,8 @@ void freeze_person(edict_t *target, edict_t *owner, int slow)
 	freeze->owner = target;
 	freeze->delay = level.time + 5;
 	freeze->nextthink = level.time + .8;
-	freeze->freeze_dura = level.time + 0.8;
+	freeze->freeze_dura = level.time + 3;
 	freeze->think = blade_freeze_think;
-	freeze->freeze_slow = slow;
 	freeze->classname = "Freeze";
 	freeze->s.sound = gi.soundindex("weapons/bfg__l1a.wav");
 	gi.linkentity(freeze);
@@ -94,19 +88,23 @@ void blade_elect_think(edict_t *self)
 
 	if(self->owner->is_elect == 0)
 	{
+		self->elect_dura = 0;
 		G_FreeEdict(self);
 		return;
 	}
 
-	if (level.time > self->elect_dura)
+	if (level.time == self->elect_dura)
 	{
 		self->owner->is_elect = 0;
+		self->elect_dura = 0;
 		G_FreeEdict(self);
 		return;
 	}
 
 	if (!self->owner)
 	{
+		self->owner->is_elect = 0;
+		self->elect_dura = 0;
 		G_FreeEdict(self);
 		return;
 	}
@@ -114,7 +112,8 @@ void blade_elect_think(edict_t *self)
 	damage = self->elect_damage;
 
 	T_Damage(self->owner, self, self, dir, self->owner->s.origin, vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK, 0);
-	self->elect_dura = level.time + 0.8;
+	if(self->elect_dura == 0)
+		self->elect_dura = level.time + 1;
 	VectorCopy(self->owner->s.origin, self->s.origin);
 	self->nextthink = level.time + .2;
 }
@@ -141,7 +140,7 @@ void elect_person(edict_t *target, edict_t *owner, int damage)
 	elect->owner = target;
 	elect->delay = level.time + 5;
 	elect->nextthink = level.time + .8;
-	elect->elect_dura = level.time + 0.8;
+	elect->elect_dura = level.time + 2;
 	elect->think = blade_elect_think;
 	elect->elect_damage = damage;
 	elect->classname = "electric";
@@ -185,10 +184,10 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 				//This tells us to damage the thing that in our path
 				T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLADE);
 				//This will check if the target will have a status effect on them upon hit
-				
+				self->current_exp += 5;
 				if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 1)
 				{
-					freeze_person(tr.ent,self, 0.5);
+					freeze_person(tr.ent,self);
 				}
 				else if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 2)
 				{
@@ -196,13 +195,20 @@ void Fire_Blade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 				}
 				else if (self->current_level == 5 && self->choosen_element == 1)
 				{
-					freeze_person(tr.ent, self, 0.3);
+					freeze_person(tr.ent, self);
 				}
 				else if (self->current_level == 5 && self->choosen_element == 2)
 				{
 					elect_person(tr.ent, self, 10);
 				}
-				
+				else if ((self->current_level == 3 || self->current_level == 4) && self->choosen_element == 3)
+				{
+					self->health += 5;
+				}
+				else if(self->current_level == 5 && self->choosen_element == 3)
+				{
+					self->health += 10;
+				}
 			}
 			else
 			{
@@ -239,9 +245,13 @@ void blade_attack(edict_t *ent, vec3_t g_offset, int damage)
 	ent->client->kick_angles[0] = -1;
 
 	Fire_Blade(ent, start, forward, damage, BLADE_KICK);
-	if(ent->health >= 100)
+	if(ent->health >= 100  && ent->current_level < 5)
 	{
 		Weapon_Blaster_Fire(ent);
+	}
+	else if(ent->health >= 100 && ent->current_level == 5)
+	{
+		weapon_bfg_fire(ent);
 	}
 }
 

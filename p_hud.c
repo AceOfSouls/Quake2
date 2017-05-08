@@ -324,15 +324,27 @@ void showPlayerInfo(edict_t *ent)
 
 	if(ent->choosen_special == 0)
 	{
-		spe = "Big Cut ";
+		spe = "Big Cut";
 	}
 	else if(ent->choosen_special == 1)
 	{
-		spe = "Health  ";
+		spe = "Health";
+	}
+	else if(ent->choosen_special == 2)
+	{
+		spe = "Blast";
+	}
+	else if(ent->choosen_special == 3)
+	{
+		spe = "Invis";
+	}
+	else if(ent->choosen_special == 4)
+	{
+		spe = "OP OP";
 	}
 	else
 	{
-		spe = "Fire Fest";
+		spe = "Speedy";
 	}
 
 	if(ent->choosen_element == 0)
@@ -343,9 +355,13 @@ void showPlayerInfo(edict_t *ent)
 	{
 		ele = "Freeze";
 	}
-	else
+	else if(ent->choosen_element == 2)
 	{
 		ele = "Elect";
+	}
+	else
+	{
+		ele = "LifeSteal";
 	}
 
 	Com_sprintf (string, sizeof(string),
@@ -355,7 +371,9 @@ void showPlayerInfo(edict_t *ent)
 		"xv 0 yv 54 cstring2 \"Get kills don't die alright!\" "		// help 1
 		"xv 0 yv 110 cstring2 \"EXP Needed: %i\" "		// help 2
 		"xv 50 yv 164 string2 \" Special  Element   Charge\" "
-		"xv 50 yv 172 string2 \" %s		  %s         %i\" ", 
+		"xv 50 yv 172 string2 \" %s\" "
+		"xv 120 yv 172 string2 \" %s\" "
+		"xv 220 yv 172 string2 \" %i\" ", 
 		ent->current_level,
 		ent->current_exp,
 		ent->needed_exp,
